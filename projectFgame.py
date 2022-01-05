@@ -26,7 +26,7 @@ HEIGHT = 800
 
 # 定義視窗
 screen = pygame.display.set_mode((WIDTH,HEIGHT))
-pygame.display.set_caption("StarWar")
+pygame.display.set_caption("東方Project")
 
 
 # 角色
@@ -67,33 +67,27 @@ class Player(pygame.sprite.Sprite):
 
     def fire(self):
         bullet = F_bullet(self.rect.centerx, self.rect.bottom)
-        player_sprite.add(bullet)
+        all_sprite.add(bullet)
+        bullets.add(bullet)
 
 
-class Enemy_L(pygame.sprite.Sprite):
+class Enemy(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((40,40))
         self.image.fill(RED)
         self.rect = self.image.get_rect()
-        self.rect.x = -50
+        self.rect.centerx = WIDTH/2
         self.rect.y = -50
-        self.speedx = 2
+        self.speedx = 1
         self.speedy = 1
         self.time = 0
 
     def update(self):
-        if self.rect.x >= 230 and self.speedx > 0:
-            self.speedx = -2
-            self.time = 120
-        elif self.rect.x <= 30 and self.speedx < 0:
-            self.speedx = 2
-            self.time = 120
-        if self.time == 0:
-            self.rect.x += self.speedx
-            self.rect.y += self.speedy
-        else:
-            self.time -= 1
+        if self.rect.y < 10:
+            self.rect.y += 1
+        
+
 
 class F_bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -111,13 +105,15 @@ class F_bullet(pygame.sprite.Sprite):
             self.kill()
 
 # sprite 群組
-player_sprite = pygame.sprite.Group()
+all_sprite = pygame.sprite.Group()
+bullets = pygame.sprite.Group()
 enemy_sprite = pygame.sprite.Group()
 
 player = Player()
-player_sprite.add(player)
-enemy_L = Enemy_L()
-enemy_sprite.add(enemy_L)
+all_sprite.add(player)
+enemy = Enemy()
+all_sprite.add(enemy)
+enemy_sprite.add(enemy)
 # 主迴圈
 
 while updating:
@@ -132,11 +128,11 @@ while updating:
     
 
     # 畫面更新
-    enemy_sprite.update()
-    player_sprite.update()
+    all_sprite.update()
+    pygame.sprite.groupcollide(enemy_sprite, bullets, False, True)
+
 
     # 畫面刷新
     screen.fill(WHITE)
-    player_sprite.draw(screen)
-    enemy_sprite.draw(screen)
+    all_sprite.draw(screen)
     pygame.display.update()
