@@ -126,38 +126,52 @@ class Enemy(pygame.sprite.Sprite):
             self.movein()
         if self.settingPlace == True:
             if self.EnemyFireMode == 1 and self.time == 0:
-                for i in range(7):
+                for i in range(9):
                     self.time = 40
-                    if i % 7 == 0:
-                        self.x = self.rect.centerx - 70
+                    if i % 9 == 0:
+                        self.x = self.rect.centerx - 120
                         self.y = self.rect.centery - 10
                         self.fire()
-                    elif i % 7 == 1:
-                        self.x = self.rect.centerx - 60
+                    elif i % 9 == 1:
+                        self.x = self.rect.centerx - 80
                         self.y = self.rect.centery + 20
                         self.fire()
-                    elif i % 7 == 2:
+                    elif i % 9 == 2:
                         self.x = self.rect.centerx - 40
                         self.y = self.rect.centery + 40
                         self.fire()
-                    elif i % 7 == 3:
+                    elif i % 9 == 3:
                         self.x = self.rect.centerx 
                         self.y = self.rect.centery + 50
                         self.fire()
-                    elif i % 7 == 4:
+                    elif i % 9 == 4:
                         self.x = self.rect.centerx + 40
                         self.y = self.rect.centery + 40
                         self.fire()
-                    elif i % 7 == 5:
-                        self.x = self.rect.centerx + 60
+                    elif i % 9 == 5:
+                        self.x = self.rect.centerx + 80
                         self.y = self.rect.centery + 20
                         self.fire()
-                    elif i % 7 == 6:
-                        self.x = self.rect.centerx + 70
+                    elif i % 9 == 6:
+                        self.x = self.rect.centerx + 120
                         self.y = self.rect.centery - 10
+                        self.fire()
+                    elif i % 9 == 7:
+                        self.x = self.rect.centerx - 180
+                        self.y = self.rect.centery - 15
+                        self.fire()
+                    elif i % 9 == 8:
+                        self.x = self.rect.centerx + 180
+                        self.y = self.rect.centery - 15
                         self.fire()
                     self.fireTime += 1
                 self.time = 40
+            
+            
+            
+            #if self.EnemyFireMode == 2 and self.time == 0:
+
+
             if self.time > 0:
                 self.time -= 1
         #    if self.fireTime >= 80:
@@ -203,7 +217,7 @@ class E_bullet(pygame.sprite.Sprite):
         self.rect.centerx = x
         self.rect.centery = y
         self.speedx = 1
-        self.speedy = 1
+        self.speedy = 3
 
     def update(self):
         if Enemy().EnemyFireMode == 1:
@@ -212,6 +226,7 @@ class E_bullet(pygame.sprite.Sprite):
             self.kill()
 
     def move_1(self):
+        self.speedx = random.randrange(-3, 4)
         self.rect.centerx += self.speedx
         self.rect.centery += self.speedy
 
