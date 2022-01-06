@@ -4,7 +4,7 @@ import os
 
 from pygame import font
 
-
+#from pygame.sprite import collide_circle
 #from pygame import key
 #from pygame.constants import KEYDOWN
 
@@ -19,6 +19,8 @@ updating = True
 
 FPS = 60
 enemy_wait = 0
+Health = 1000
+gamestep = 0
 
 
 WHITE = (255, 255, 255)
@@ -29,7 +31,8 @@ BLUE = (0, 0, 255)
 WIDTH = 1000
 HEIGHT = 800
 P_WIDTH = 600
-Health = 1000
+
+
 
 # 定義視窗
 screen = pygame.display.set_mode((WIDTH,HEIGHT))
@@ -52,10 +55,10 @@ def draw_text(surf, text, size, x, y):
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((60, 60))
+        self.image = pygame.Surface((40, 40))
         self.image.fill(GREEN)
         self.rect = self.image.get_rect()
-        self.radius = 25
+        self.radius = 18
         pygame.draw.circle(self.image, RED, self.rect.center, self.radius)
         self.rect.centerx = P_WIDTH/2
         self.rect.bottom = HEIGHT - 70
@@ -112,41 +115,68 @@ class Enemy(pygame.sprite.Sprite):
         self.speedx = 1
         self.speedy = 1
         self.time = 0
+        self.fireTime = 0
         self.settingPlace = False
-        self.EnemyFireMode = 0
-    #    self.Health = 1000
-
-    
+        self.EnemyFireMode = 1
+        self.x = 0
+        self.y = 0
 
     def update(self):
         if self.settingPlace == False:
             self.movein()
- #       if self.settingPlace == True:
-  #          if self.EnemyFireMode == 0:
-   #             for i in range(28):
-    #                if i % 4 == 0:
-     #                   Enemy.fire_0(self.rect.centerx - 40, self.rect.centery + 50)
-      #              elif i % 4 == 1:
-       #                 Enemy.fire_0(self.rect.centerx + 40, self.rect.centery + 50)
-        #            elif i % 4 == 2:
-         #               Enemy.fire_0(self.rect.centerx - 50, self.rect.centery)
-          #          elif i % 4 == 3:
-           #             Enemy.fire_0(self.rect.centerx + 50, self.rect.centery)
-                
+        if self.settingPlace == True:
+            if self.EnemyFireMode == 1 and self.time == 0:
+                for i in range(7):
+                    self.time = 40
+                    if i % 7 == 0:
+                        self.x = self.rect.centerx - 70
+                        self.y = self.rect.centery - 10
+                        self.fire()
+                    elif i % 7 == 1:
+                        self.x = self.rect.centerx - 60
+                        self.y = self.rect.centery + 20
+                        self.fire()
+                    elif i % 7 == 2:
+                        self.x = self.rect.centerx - 40
+                        self.y = self.rect.centery + 40
+                        self.fire()
+                    elif i % 7 == 3:
+                        self.x = self.rect.centerx 
+                        self.y = self.rect.centery + 50
+                        self.fire()
+                    elif i % 7 == 4:
+                        self.x = self.rect.centerx + 40
+                        self.y = self.rect.centery + 40
+                        self.fire()
+                    elif i % 7 == 5:
+                        self.x = self.rect.centerx + 60
+                        self.y = self.rect.centery + 20
+                        self.fire()
+                    elif i % 7 == 6:
+                        self.x = self.rect.centerx + 70
+                        self.y = self.rect.centery - 10
+                        self.fire()
+                    self.fireTime += 1
+                self.time = 40
+            if self.time > 0:
+                self.time -= 1
+        #    if self.fireTime >= 80:
+         #       self.firemode()
 
     def movein(self):
         if self.rect.centery < 50:
             self.rect.y += 1
         else:
             self.settingPlace = True
-
+            
     def firemode(self):
-        self.EnemyFireMode = random.randrange(1,4)
+        self.EnemyFireMode = random.randrange(1,2)
 
-    def fire_0(self, x, y):
-        bullet = E_bullet_0(x, y)
+    def fire(self):
+        bullet = E_bullet(self.x, self.y)
         all_sprite.add(bullet)
-        bullets.add(bullet)
+        enemy_bullets.add(bullet)
+
         
 class F_bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -163,27 +193,34 @@ class F_bullet(pygame.sprite.Sprite):
         if self.rect.bottom < 0:
             self.kill()
 
-class E_bullet_0(pygame.sprite.Sprite):
+class E_bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((10,10))
-        self.image.fill(BLACK)
+        self.image = pygame.Surface((18,18))
+        self.image.fill(BLUE)
         self.rect = self.image.get_rect()
+        self.radius = 9
         self.rect.centerx = x
-        self.rect.bottom = y
-        self.speedx = 2
-        self.speedy = 3
+        self.rect.centery = y
+        self.speedx = 1
+        self.speedy = 1
 
     def update(self):
-        self.rect.x += self.speedx
-        self.rect.y += self.speedy
-        if self.rect.top > HEIGHT:
+        if Enemy().EnemyFireMode == 1:
+            self.move_1()
+        if self.rect.top > HEIGHT or self.rect.right > P_WIDTH or self.rect.left < 0:
             self.kill()
+
+    def move_1(self):
+        self.rect.centerx += self.speedx
+        self.rect.centery += self.speedy
+
 
 # sprite 群組
 all_sprite = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 enemy_sprite = pygame.sprite.Group()
+enemy_bullets = pygame.sprite.Group()
 
 player = Player()
 all_sprite.add(player)
@@ -203,12 +240,12 @@ while updating:
 
     # 畫面更新
     all_sprite.update()
-    pygame.sprite.groupcollide(enemy_sprite, bullets, False, True)
-
-    hits = pygame.sprite.spritecollide(enemy_sprite, bullets, False)
-    if hits:
+    hit = pygame.sprite.groupcollide(enemy_sprite, bullets, False, True, pygame.sprite.collide_circle)
+    if hit:
         Health -= 1
 
+
+    
     # 畫面刷新
     screen.fill(WHITE)
     screen.blit(frame_IMG, (0, 0))
